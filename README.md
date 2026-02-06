@@ -5,6 +5,7 @@ Ce dépôt contient trois scripts pour installer et gérer un cluster Kubernetes
 - `k8s-master-install.sh` : initialise le master (kubeadm) et installe Flannel
 - `k8s-node-install.sh` : prépare un worker et laisse prêt pour `kubeadm join`
 - `k8s-cleanup.sh` : nettoyage complet du cluster (reset total)
+- `ttyd-install.sh` : installe un terminal web (ttyd) accessible depuis le navigateur
 
 ---
 
@@ -185,6 +186,34 @@ kubectl top nodes
 ```bash
 kubeadm token create --print-join-command
 ```
+
+---
+
+## 🖥️ Terminal Web (ttyd)
+
+Installez ttyd sur le master pour accéder à un terminal directement depuis votre navigateur :
+
+```bash
+curl -o ttyd-install.sh https://raw.githubusercontent.com/LeGrandF38/kubernetes-cluster/main/ttyd-install.sh
+chmod +x ttyd-install.sh
+sudo ./ttyd-install.sh
+```
+
+Accès : `http://<IP_MASTER>:7681`
+
+Le service tourne en permanence via systemd. Pour ajouter une authentification :
+
+```bash
+sudo systemctl edit ttyd
+```
+
+Remplacez la ligne `ExecStart` par :
+
+```
+ExecStart=/usr/local/bin/ttyd --port 7681 --writable -c user:motdepasse bash
+```
+
+Puis `sudo systemctl restart ttyd`.
 
 ---
 

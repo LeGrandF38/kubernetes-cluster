@@ -95,6 +95,19 @@ sudo kubeadm join <IP_MASTER>:6443 --token <token> --discovery-token-ca-cert-has
 sudo kubeadm join <IP_MASTER>:6443 --token <token> --discovery-token-ca-cert-hash sha256:<hash> --ignore-preflight-errors=NumCPU
 ```
 
+**Si `sudo: kubeadm: command not found` mais que `which kubeadm` retourne `/usr/bin/kubeadm` :**
+- Vous êtes probablement déjà root, utilisez simplement :
+
+```bash
+kubeadm join <IP_MASTER>:6443 --token <token> --discovery-token-ca-cert-hash sha256:<hash> --ignore-preflight-errors=NumCPU
+```
+
+  ou bien le chemin complet :
+
+```bash
+sudo /usr/bin/kubeadm join <IP_MASTER>:6443 --token <token> --discovery-token-ca-cert-hash sha256:<hash> --ignore-preflight-errors=NumCPU
+```
+
 ---
 
 ## Notes et bonnes pratiques 💡
@@ -102,6 +115,64 @@ sudo kubeadm join <IP_MASTER>:6443 --token <token> --discovery-token-ca-cert-has
 - Assurez-vous que la variable `K8S_VERSION` dans les scripts correspond entre master et nodes pour éviter des incompatibilités de version.
 - Le script détecte l'IP principale via `hostname -I | awk '{print $1}'` — vous pouvez modifier si votre interface réseau est différente.
 - Si vous souhaitez utiliser un autre CNI (Calico, Cilium...), remplacez l'appel à Flannel dans le script master.
+
+---
+
+## Gestion du cluster depuis une autre machine (kubeconfig)
+
+Vous pouvez gérer le cluster depuis votre PC (ou une autre VM) sans vous connecter en SSH au master à chaque fois.
+
+1. Sur le **master**, vérifiez que le fichier kubeconfig existe (créé par le script) :
+
+```bash
+ls /root/.kube/config
+```
+
+2. Depuis votre machine cliente (Linux/macOS avec `kubectl` installé), copiez la configuration :
+
+```bash
+scp root@<IP_MASTER>:/root/.kube/config ~/.kube/config
+```
+
+3. Testez l'accès au cluster depuis votre machine :
+
+```bash
+kubectl get nodes
+```
+
+Si vous avez plusieurs clusters, vous pouvez renommer le fichier (`~/.kube/config-mindy`) et utiliser la variable `KUBECONFIG` :
+
+```bash
+export KUBECONFIG=~/.kube/config-mindy
+kubectl config get-contexts
+```
+
+---
+
+## Déployer le minimum nécessaire
+
+Quelques exemples rapides à lancer depuis la machine qui a `kubectl` configuré :
+
+1. **Déployer metrics-server** (pour `kubectl top`) :
+
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+```
+
+2. **Déployer une appli de test (nginx)** :
+
+```bash
+kubectl create deployment nginx-demo --image=nginx --replicas=1
+kubectl expose deployment nginx-demo --type=NodePort --port=80
+kubectl get svc nginx-demo
+```
+
+3. **Vérifier que tout tourne bien** :
+
+```bash
+kubectl get pods -A
+kubectl top nodes
+```
 
 ---
 

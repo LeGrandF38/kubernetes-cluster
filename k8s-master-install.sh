@@ -95,12 +95,12 @@ kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$MAS
 
 info "Étape 9/10 : Configuration de kubectl pour l'utilisateur..."
 mkdir -p $HOME/.kube
-cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+cp -f /etc/kubernetes/admin.conf $HOME/.kube/config
 chown $(id -u):$(id -g) $HOME/.kube/config
 
 # Configuration aussi pour root
 mkdir -p /root/.kube
-cp -i /etc/kubernetes/admin.conf /root/.kube/config
+cp -f /etc/kubernetes/admin.conf /root/.kube/config
 
 info "Étape 10/10 : Installation du plugin réseau Flannel..."
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml

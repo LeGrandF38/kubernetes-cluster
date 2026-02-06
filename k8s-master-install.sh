@@ -91,7 +91,7 @@ info "Étape 8/10 : Initialisation du cluster Kubernetes..."
 MASTER_IP=$(hostname -I | awk '{print $1}')
 info "Adresse IP du master détectée : $MASTER_IP"
 
-kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$MASTER_IP
+kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$MASTER_IP --ignore-preflight-errors=NumCPU
 
 info "Étape 9/10 : Configuration de kubectl pour l'utilisateur..."
 mkdir -p $HOME/.kube

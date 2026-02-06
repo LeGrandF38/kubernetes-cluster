@@ -150,6 +150,37 @@ kubectl config get-contexts
 
 ---
 
+## 📤 Exporter le kubeconfig du cluster
+
+Un nouveau script `k8s-export-kubeconfig.sh` a été ajouté pour faciliter l'export du fichier `admin.conf` (kubeconfig) du master. Ce script propose plusieurs méthodes d'export, y compris des services d'upload temporaires et des options de copier-coller.
+
+### Utilisation
+
+```bash
+# Rendre le script exécutable
+chmod +x k8s-export-kubeconfig.sh
+
+# Mode interactif (menu)
+./k8s-export-kubeconfig.sh
+
+# Mode automatique (essaie toutes les méthodes disponibles)
+./k8s-export-kubeconfig.sh --auto
+```
+
+### Méthodes supportées
+
+- **transfer.sh** : Upload temporaire (14 jours)
+- **file.io** : Upload supprimé après un téléchargement
+- **0x0.st** : Service rapide et simple
+- **tmpfiles.org** : Fichiers temporaires
+- **dpaste.org** : Pastebin YAML (7 jours)
+- **Base64** : Encodage pour copier-coller
+- **Brut** : Affichage direct du contenu YAML
+
+Pour plus de détails, consultez les logs générés par le script lors de son exécution.
+
+---
+
 ## Déployer le minimum nécessaire
 
 Quelques exemples rapides à lancer depuis la machine qui a `kubectl` configuré :

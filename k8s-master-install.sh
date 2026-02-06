@@ -72,10 +72,14 @@ info "Étape 6/10 : Ajout du dépôt Kubernetes..."
 apt-get update
 apt-get install -y apt-transport-https ca-certificates curl gpg
 
-mkdir -p /etc/apt/keyrings
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+# Version Kubernetes (modifiable)
+K8S_VERSION="v1.32"
 
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' > /etc/apt/sources.list.d/kubernetes.list
+mkdir -p /etc/apt/keyrings
+rm -f /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/${K8S_VERSION}/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/${K8S_VERSION}/deb/ /" > /etc/apt/sources.list.d/kubernetes.list
 
 info "Étape 7/10 : Installation de kubeadm, kubelet et kubectl..."
 apt-get update
@@ -83,7 +87,11 @@ apt-get install -y kubelet kubeadm kubectl
 apt-mark hold kubelet kubeadm kubectl
 
 info "Étape 8/10 : Initialisation du cluster Kubernetes..."
-kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=10.0.0.100
+# Détection automatique de l'adresse IP principale
+MASTER_IP=$(hostname -I | awk '{print $1}')
+info "Adresse IP du master détectée : $MASTER_IP"
+
+kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$MASTER_IP
 
 info "Étape 9/10 : Configuration de kubectl pour l'utilisateur..."
 mkdir -p $HOME/.kube

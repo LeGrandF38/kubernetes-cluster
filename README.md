@@ -1,9 +1,10 @@
 # Kubernetes Cluster - Installation rapide 🚀
 
-Ce dépôt contient deux scripts pour installer un cluster Kubernetes simple (master + worker) sur des VMs Debian/Ubuntu :
+Ce dépôt contient trois scripts pour installer et gérer un cluster Kubernetes simple (master + worker) sur des VMs Debian/Ubuntu :
 
 - `k8s-master-install.sh` : initialise le master (kubeadm) et installe Flannel
 - `k8s-node-install.sh` : prépare un worker et laisse prêt pour `kubeadm join`
+- `k8s-cleanup.sh` : nettoyage complet du cluster (reset total)
 
 ---
 
@@ -12,6 +13,8 @@ Ce dépôt contient deux scripts pour installer un cluster Kubernetes simple (ma
 - Détection automatique de l'adresse IP du master (plus besoin de modifier une IP en dur)
 - Variable `K8S_VERSION` pour contrôler la version du dépôt APT Kubernetes
 - Gestion améliorée de la clé GPG (suppression avant création afin d'éviter des conflits)
+- Support des VMs 1 CPU avec `--ignore-preflight-errors=NumCPU`
+- Script de nettoyage complet `k8s-cleanup.sh` pour reset le cluster
 
 ---
 
@@ -26,6 +29,27 @@ Ce dépôt contient deux scripts pour installer un cluster Kubernetes simple (ma
   - kubelet: 10250
   - kube-scheduler / kube-controller-manager / kube-proxy as needed
 - Au moins 2GB RAM et 2 vCPU (recommandé pour le master)
+
+---
+
+## 🧹 Nettoyage complet du cluster
+
+Si vous devez réinstaller ou corriger des erreurs, utilisez le script de nettoyage :
+
+```bash
+curl -o k8s-cleanup.sh https://raw.githubusercontent.com/LeGrandF38/kubernetes-cluster/main/k8s-cleanup.sh
+chmod +x k8s-cleanup.sh
+sudo ./k8s-cleanup.sh
+```
+
+Ce script :
+- Fait un `kubeadm reset` propre
+- Supprime toutes les interfaces réseau (cni0, flannel.1, etc.)
+- Nettoie les dossiers Kubernetes et K3s
+- Réinitialise les règles iptables
+- Demande confirmation avant suppression
+
+Après nettoyage, vous pouvez relancer les scripts d'installation normalement.
 
 ---
 
@@ -64,6 +88,11 @@ sudo ./k8s-node-install.sh
 
 ```bash
 sudo kubeadm join <IP_MASTER>:6443 --token <token> --discovery-token-ca-cert-hash sha256:<hash>
+```
+
+**Si erreur CPU sur le worker :**
+```bash
+sudo kubeadm join <IP_MASTER>:6443 --token <token> --discovery-token-ca-cert-hash sha256:<hash> --ignore-preflight-errors=NumCPU
 ```
 
 ---
